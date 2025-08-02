@@ -1,7 +1,11 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from "react"
+import { Link } from "react-router-dom"
 
 const Header: React.FC = () => {
+  // const isAuthenticated = localStorage.getItem("isAuthenticated") === "true"
+
+
+  // Removed unused isCustomerArea variable
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,8 +17,8 @@ const Header: React.FC = () => {
             </Link>
           </div>
           
-          {/* Center: Home */}
-          <div className="flex-1 flex justify-center">
+          {/* Navigation Links */}
+          <div className="flex-1 flex justify-center space-x-8">
             <Link 
               to="/"
               className="text-gray-800 hover:text-blue-600 font-semibold text-lg transition-colors duration-200"
