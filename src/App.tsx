@@ -6,7 +6,10 @@ import BookingPage from "./Pages/BookingPage"
 import LoginPage from "./Pages/customer/LoginPage"
 import DashboardPage from "./Pages/customer/DashboardPage"
 import AppointmentsPage from "./Pages/customer/AppointmentsPage"
-import ProtectedRoute from "./routes/ProtectedRoute"
+import AdminLoginPage from "./Pages/admin/LoginPage"
+import AdminDashboard from "./Pages/admin/DashboardPage"
+import AdminAppointments from "./Pages/admin/AppointmentsPage"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 
 function App() {
@@ -17,12 +20,13 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/book" element={<BookingPage />} />
         <Route path="/customer/login" element={<LoginPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
         {/* Protected Customer Routes */}
         <Route
           path="/customer/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="customer">
               <DashboardPage />
             </ProtectedRoute>
           }
@@ -30,8 +34,26 @@ function App() {
         <Route
           path="/customer/appointments"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="customer">
               <AppointmentsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Admin Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/appointments"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminAppointments />
             </ProtectedRoute>
           }
         />
