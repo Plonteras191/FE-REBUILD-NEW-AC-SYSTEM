@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Calendar, AlertCircle } from "lucide-react"
-import Layout from "../../components/Layout"
+import AuthLayout from "../../Auth/AuthLayout"
 
 type AppointmentStatus = "Scheduled" | "Completed" | "Cancelled"
 
@@ -62,7 +62,7 @@ const AppointmentsPage: React.FC = () => {
   )
 
   return (
-    <Layout>
+    <AuthLayout role="customer">
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -217,7 +217,7 @@ const AppointmentsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </Layout>
+    </AuthLayout>
   )
 }
 

@@ -1,7 +1,7 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, Clock, List, Plus } from "lucide-react"
-import Layout from "../../components/Layout"
+import AuthLayout from "../../Auth/AuthLayout"
 
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
@@ -18,7 +18,7 @@ const DashboardPage: React.FC = () => {
   }, [navigate])
 
   return (
-    <Layout>
+    <AuthLayout role="customer">
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {/* Welcome Banner */}
@@ -92,7 +92,7 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </AuthLayout>
   )
 }
 

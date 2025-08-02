@@ -6,7 +6,7 @@ import BookingPage from "./Pages/BookingPage"
 import LoginPage from "./Pages/customer/LoginPage"
 import DashboardPage from "./Pages/customer/DashboardPage"
 import AppointmentsPage from "./Pages/customer/AppointmentsPage"
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./routes/ProtectedRoute"
 
 
 function App() {
