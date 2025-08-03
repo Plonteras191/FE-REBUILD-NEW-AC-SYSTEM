@@ -57,8 +57,9 @@ const AdminAppointments: React.FC = () => {
     { id: "3", name: "Tech 3" }
   ]
 
-  const handleAccept = () => {
+  const handleAccept = (appointment: Appointment) => {
     // TODO: Implement actual API call
+    console.log(`Processing appointment ${appointment.id} for ${appointment.customerName}`)
     toast.success("Appointment accepted successfully!")
   }
 
@@ -78,8 +79,9 @@ const AdminAppointments: React.FC = () => {
     setNewDate("")
   }
 
-  const handleComplete = () => {
+  const handleComplete = (appointment: Appointment) => {
     // TODO: Implement actual API call
+    console.log(`Marking appointment ${appointment.id} as completed`)
     toast.success("Service marked as completed!")
   }
 
@@ -208,7 +210,7 @@ const AdminAppointments: React.FC = () => {
                         {activeTab === "pending" ? (
                           <>
                             <button
-                              onClick={handleAccept}
+                              onClick={() => handleAccept(appointment)}
                               className="text-green-600 hover:text-green-800"
                             >
                               Accept
@@ -225,7 +227,7 @@ const AdminAppointments: React.FC = () => {
                           </>
                         ) : (
                           <button
-                            onClick={handleComplete}
+                            onClick={() => handleComplete(appointment)}
                             className="text-blue-600 hover:text-blue-800"
                           >
                             Complete

@@ -9,7 +9,7 @@ import AppointmentsPage from "./Pages/customer/AppointmentsPage"
 import AdminLoginPage from "./Pages/admin/LoginPage"
 import AdminDashboard from "./Pages/admin/DashboardPage"
 import AdminAppointments from "./Pages/admin/AppointmentsPage"
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./routes/ProtectedRoute"
 
 
 function App() {

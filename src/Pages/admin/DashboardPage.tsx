@@ -1,7 +1,7 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { Users, Calendar, CheckCircle, Clock } from "lucide-react"
-import AuthLayout from "../../Auth/AuthLayout"
+import AuthLayout from "../../components/AuthLayout"
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate()
