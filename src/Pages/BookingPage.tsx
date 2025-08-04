@@ -5,12 +5,20 @@ import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { Plus, Trash2, User, Mail, Phone, MapPin, Calendar, Settings, Zap } from "lucide-react"
 import Layout from "../components/Layout"
+import { bookingAPI, type BookingFormData as APIBookingFormData } from "../Api/api"
+
+interface ACTypeInput {
+  id: string
+  type: "Central" | "Window" | "Split"
+  quantity: number
+}
 
 interface Service {
   id: string
   type: "Cleaning" | "Repair" | "Installation" | "Maintenance"
-  acType: "Central" | "Window" | "Split"
   date: string
+  time: string
+  acTypes: ACTypeInput[]
 }
 
 interface BookingFormData {
@@ -27,8 +35,15 @@ const BookingPage: React.FC = () => {
     email: "",
     phone: "",
     address: "",
-    services: [{ id: "1", type: "Cleaning", acType: "Split", date: "" }],
+    services: [{ 
+      id: "1", 
+      type: "Cleaning", 
+      date: "", 
+      time: "09:00",
+      acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+    }],
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -38,7 +53,7 @@ const BookingPage: React.FC = () => {
     }))
   }
 
-  const handleServiceChange = (index: number, field: keyof Service, value: string) => {
+  const handleServiceChange = (index: number, field: keyof Service, value: string | ACTypeInput[]) => {
     setFormData((prev) => {
       const newServices = [...prev.services]
       newServices[index] = {
@@ -52,12 +67,72 @@ const BookingPage: React.FC = () => {
     })
   }
 
+  const handleACTypeChange = (serviceIndex: number, acTypeIndex: number, field: keyof ACTypeInput, value: string | number) => {
+    setFormData((prev) => {
+      const newServices = [...prev.services]
+      const newACTypes = [...newServices[serviceIndex].acTypes]
+      newACTypes[acTypeIndex] = {
+        ...newACTypes[acTypeIndex],
+        [field]: value,
+      }
+      newServices[serviceIndex] = {
+        ...newServices[serviceIndex],
+        acTypes: newACTypes,
+      }
+      return {
+        ...prev,
+        services: newServices,
+      }
+    })
+  }
+
+  const addACType = (serviceIndex: number) => {
+    setFormData((prev) => {
+      const newServices = [...prev.services]
+      const newACTypes = [...newServices[serviceIndex].acTypes]
+      newACTypes.push({
+        id: String(newACTypes.length + 1),
+        type: "Split",
+        quantity: 1,
+      })
+      newServices[serviceIndex] = {
+        ...newServices[serviceIndex],
+        acTypes: newACTypes,
+      }
+      return {
+        ...prev,
+        services: newServices,
+      }
+    })
+  }
+
+  const removeACType = (serviceIndex: number, acTypeIndex: number) => {
+    setFormData((prev) => {
+      const newServices = [...prev.services]
+      const newACTypes = newServices[serviceIndex].acTypes.filter((_, i) => i !== acTypeIndex)
+      newServices[serviceIndex] = {
+        ...newServices[serviceIndex],
+        acTypes: newACTypes,
+      }
+      return {
+        ...prev,
+        services: newServices,
+      }
+    })
+  }
+
   const addService = () => {
     setFormData((prev) => ({
       ...prev,
       services: [
         ...prev.services,
-        { id: String(prev.services.length + 1), type: "Cleaning", acType: "Split", date: "" },
+        { 
+          id: String(prev.services.length + 1), 
+          type: "Cleaning", 
+          date: "", 
+          time: "09:00",
+          acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+        },
       ],
     }))
   }
@@ -69,17 +144,81 @@ const BookingPage: React.FC = () => {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
-    toast.success("Booking submitted successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    })
+    
+    // Validate that all services have at least one AC type
+    for (const service of formData.services) {
+      if (service.acTypes.length === 0) {
+        toast.error("Each service must have at least one AC type")
+        return
+      }
+    }
+
+    setIsSubmitting(true)
+    
+    try {
+      // Transform data to match Laravel API format
+      const apiFormData: APIBookingFormData = {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email || undefined,
+        completeAddress: formData.address,
+        services: formData.services.map(service => ({
+          type: service.type,
+          date: service.date,
+          time: service.time,
+          acTypes: service.acTypes.map(acType => ({
+            type: acType.type,
+            quantity: acType.quantity,
+          })),
+        })),
+      }
+
+      console.log("Submitting booking:", apiFormData)
+      
+      const response = await bookingAPI.createBooking(apiFormData)
+      
+      if (response.success) {
+        toast.success(`Booking created successfully! Booking ID: ${response.bookingId}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        })
+        
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+          services: [{ 
+            id: "1", 
+            type: "Cleaning", 
+            date: "", 
+            time: "09:00",
+            acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+          }],
+        })
+      } else {
+        toast.error(response.message || "Failed to create booking")
+      }
+    } catch (error: any) {
+      console.error("Booking submission error:", error)
+      
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message)
+      } else if (error.message) {
+        toast.error(error.message)
+      } else {
+        toast.error("Failed to submit booking. Please try again.")
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const getServiceIcon = (type: string) => {
@@ -239,19 +378,6 @@ const BookingPage: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">AC Type</label>
-                        <select
-                          value={service.acType}
-                          onChange={(e) => handleServiceChange(index, "acType", e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 bg-white"
-                        >
-                          <option value="Central">Central AC</option>
-                          <option value="Window">Window AC</option>
-                          <option value="Split">Split AC</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Service Date</label>
                         <input
                           type="date"
@@ -260,6 +386,78 @@ const BookingPage: React.FC = () => {
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300"
                           required
                         />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Service Time</label>
+                        <input
+                          type="time"
+                          value={service.time}
+                          onChange={(e) => handleServiceChange(index, "time", e.target.value)}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* AC Types Section */}
+                    <div className="mt-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-lg font-semibold text-gray-800">AC Units</h4>
+                        <button
+                          type="button"
+                          onClick={() => addACType(index)}
+                          className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all duration-200 flex items-center gap-2 text-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add AC Unit
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {service.acTypes.map((acType, acTypeIndex) => (
+                          <div key={acType.id} className="bg-white rounded-lg p-4 border border-gray-200">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-600">AC Type</label>
+                                <select
+                                  value={acType.type}
+                                  onChange={(e) => handleACTypeChange(index, acTypeIndex, "type", e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                >
+                                  <option value="Central">Central AC</option>
+                                  <option value="Window">Window AC</option>
+                                  <option value="Split">Split AC</option>
+                                </select>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-600">Quantity</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="20"
+                                  value={acType.quantity}
+                                  onChange={(e) => handleACTypeChange(index, acTypeIndex, "quantity", parseInt(e.target.value))}
+                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  required
+                                />
+                              </div>
+                              
+                              <div className="flex justify-end">
+                                {service.acTypes.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => removeACType(index, acTypeIndex)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -280,9 +478,14 @@ const BookingPage: React.FC = () => {
             <div className="flex justify-center pt-4">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-12 py-4 rounded-xl font-semibold text-lg shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none"
+                disabled={isSubmitting}
+                className={`px-12 py-4 rounded-xl font-semibold text-lg shadow-lg transform transition-all duration-300 hover:shadow-xl focus:ring-4 focus:ring-blue-300 focus:outline-none ${
+                  isSubmitting
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:scale-105"
+                }`}
               >
-                Submit Booking Request
+                {isSubmitting ? "Submitting..." : "Submit Booking Request"}
               </button>
             </div>
           </form>
