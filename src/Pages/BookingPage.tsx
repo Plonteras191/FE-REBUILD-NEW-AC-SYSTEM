@@ -10,14 +10,12 @@ import { bookingAPI, type BookingFormData as APIBookingFormData } from "../Api/a
 interface ACTypeInput {
   id: string
   type: "Central" | "Window" | "Split"
-  quantity: number
 }
 
 interface Service {
   id: string
   type: "Cleaning" | "Repair" | "Installation" | "Maintenance"
   date: string
-  time: string
   acTypes: ACTypeInput[]
 }
 
@@ -39,8 +37,7 @@ const BookingPage: React.FC = () => {
       id: "1", 
       type: "Cleaning", 
       date: "", 
-      time: "09:00",
-      acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+      acTypes: [{ id: "1", type: "Split" }]
     }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -67,7 +64,7 @@ const BookingPage: React.FC = () => {
     })
   }
 
-  const handleACTypeChange = (serviceIndex: number, acTypeIndex: number, field: keyof ACTypeInput, value: string | number) => {
+  const handleACTypeChange = (serviceIndex: number, acTypeIndex: number, field: keyof ACTypeInput, value: string) => {
     setFormData((prev) => {
       const newServices = [...prev.services]
       const newACTypes = [...newServices[serviceIndex].acTypes]
@@ -93,7 +90,6 @@ const BookingPage: React.FC = () => {
       newACTypes.push({
         id: String(newACTypes.length + 1),
         type: "Split",
-        quantity: 1,
       })
       newServices[serviceIndex] = {
         ...newServices[serviceIndex],
@@ -130,8 +126,7 @@ const BookingPage: React.FC = () => {
           id: String(prev.services.length + 1), 
           type: "Cleaning", 
           date: "", 
-          time: "09:00",
-          acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+          acTypes: [{ id: "1", type: "Split" }]
         },
       ],
     }))
@@ -167,10 +162,8 @@ const BookingPage: React.FC = () => {
         services: formData.services.map(service => ({
           type: service.type,
           date: service.date,
-          time: service.time,
           acTypes: service.acTypes.map(acType => ({
             type: acType.type,
-            quantity: acType.quantity,
           })),
         })),
       }
@@ -199,8 +192,7 @@ const BookingPage: React.FC = () => {
             id: "1", 
             type: "Cleaning", 
             date: "", 
-            time: "09:00",
-            acTypes: [{ id: "1", type: "Split", quantity: 1 }]
+            acTypes: [{ id: "1", type: "Split" }]
           }],
         })
       } else {
@@ -362,7 +354,7 @@ const BookingPage: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Service Type</label>
                         <select
@@ -387,17 +379,6 @@ const BookingPage: React.FC = () => {
                           required
                         />
                       </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Service Time</label>
-                        <input
-                          type="time"
-                          value={service.time}
-                          onChange={(e) => handleServiceChange(index, "time", e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300"
-                          required
-                        />
-                      </div>
                     </div>
 
                     {/* AC Types Section */}
@@ -417,7 +398,7 @@ const BookingPage: React.FC = () => {
                       <div className="space-y-3">
                         {service.acTypes.map((acType, acTypeIndex) => (
                           <div key={acType.id} className="bg-white rounded-lg p-4 border border-gray-200">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                               <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-600">AC Type</label>
                                 <select
@@ -429,19 +410,6 @@ const BookingPage: React.FC = () => {
                                   <option value="Window">Window AC</option>
                                   <option value="Split">Split AC</option>
                                 </select>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-600">Quantity</label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  max="20"
-                                  value={acType.quantity}
-                                  onChange={(e) => handleACTypeChange(index, acTypeIndex, "quantity", parseInt(e.target.value))}
-                                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  required
-                                />
                               </div>
                               
                               <div className="flex justify-end">

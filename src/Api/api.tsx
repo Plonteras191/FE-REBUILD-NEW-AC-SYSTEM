@@ -48,13 +48,11 @@ api.interceptors.response.use(
 // Types for booking
 export interface ACType {
   type: string;
-  quantity: number;
 }
 
 export interface ServiceData {
   type: 'Cleaning' | 'Repair' | 'Installation' | 'Maintenance';
   date: string;
-  time?: string;
   acTypes: ACType[];
 }
 
