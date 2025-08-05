@@ -7,6 +7,9 @@ import {
   LogOut,
   User,
   ChevronRight,
+  DollarSign,
+  FileText,
+  CalendarDays,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -42,6 +45,21 @@ const Sidebar: React.FC<SidebarProps> = ({ role, onLogout }) => {
       title: "Appointments",
       path: "/admin/appointments",
       icon: <Calendar className="w-5 h-5" />,
+    },
+    {
+      title: "Calendar",
+      path: "/admin/calendar",
+      icon: <CalendarDays className="w-5 h-5" />,
+    },
+    {
+      title: "Revenue",
+      path: "/admin/revenue",
+      icon: <DollarSign className="w-5 h-5" />,
+    },
+    {
+      title: "Reports",
+      path: "/admin/reports",
+      icon: <FileText className="w-5 h-5" />,
     },
     {
       title: "Settings",

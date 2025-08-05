@@ -9,6 +9,9 @@ import AppointmentsPage from "./Pages/customer/AppointmentsPage"
 import AdminLoginPage from "./Pages/admin/LoginPage"
 import AdminDashboard from "./Pages/admin/DashboardPage"
 import AdminAppointments from "./Pages/admin/AppointmentsPage"
+import AdminCalendar from "./Pages/admin/CalendarPage"
+import AdminRevenue from "./Pages/admin/RevenuePage"
+import AdminReports from "./Pages/admin/ReportsPage"
 import ProtectedRoute from "./routes/ProtectedRoute"
 
 
@@ -54,6 +57,30 @@ function App() {
           element={
             <ProtectedRoute role="admin">
               <AdminAppointments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/calendar"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminCalendar />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/revenue"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminRevenue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminReports />
             </ProtectedRoute>
           }
         />
