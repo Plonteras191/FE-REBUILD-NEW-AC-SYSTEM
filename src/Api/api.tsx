@@ -185,4 +185,91 @@ export const bookingAPI = {
   },
 };
 
+// Appointment API functions for admin
+export const appointmentAPI = {
+  // Get all appointments
+  getAppointments: async () => {
+    try {
+      const response = await api.get('/appointments');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  },
+
+  // Accept an appointment
+  acceptAppointment: async (id: string, technicianNames: string[] = []) => {
+    try {
+      const response = await api.post(`/appointments/${id}/accept`, {
+        technician_names: technicianNames
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error accepting appointment:', error);
+      throw error;
+    }
+  },
+
+  // Cancel (reject) an appointment
+  cancelAppointment: async (id: string) => {
+    try {
+      const response = await api.delete(`/appointments/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error cancelling appointment:', error);
+      throw error;
+    }
+  },
+
+  // Complete an appointment
+  completeAppointment: async (id: string) => {
+    try {
+      const response = await api.post(`/appointments/${id}/complete`);
+      return response.data;
+    } catch (error) {
+      console.error('Error completing appointment:', error);
+      throw error;
+    }
+  },
+
+  // Reschedule an appointment service
+  rescheduleAppointment: async (id: string, serviceName: string, newDate: string) => {
+    try {
+      const response = await api.post(`/appointments/${id}/reschedule`, {
+        service_name: serviceName,
+        new_date: newDate
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      throw error;
+    }
+  },
+
+  // Assign technicians to an appointment
+  assignTechnicians: async (id: string, technicianNames: string[]) => {
+    try {
+      const response = await api.post(`/appointments/${id}/assign-technicians`, {
+        technician_names: technicianNames
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning technicians:', error);
+      throw error;
+    }
+  },
+
+  // Get all technicians
+  getTechnicians: async () => {
+    try {
+      const response = await api.get('/appointments/technicians');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching technicians:', error);
+      throw error;
+    }
+  }
+};
+
 export default api;

@@ -1,101 +1,246 @@
-import React, { useState } from "react"
-import { AlertCircle, Users } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { Users } from "lucide-react"
 import AuthLayout from "../../Auth/AuthLayout"
 import { toast } from "react-toastify"
+import api from "../../Api/api"
 
 interface Technician {
   id: string
   name: string
 }
 
+interface ServiceData {
+  type: string
+  date: string
+  ac_types: string[]
+}
+
 interface Appointment {
   id: string
-  customerName: string
-  date: string
-  service: string
-  acType: string
-  status: "pending" | "accepted" | "completed" | "rejected"
-  technicians: Technician[]
+  name: string
+  phone: string
+  email: string
+  complete_address: string
+  status: string
+  status_id: number
+  technicians: string[]
+  services: string // JSON string of ServiceData[]
+  created_at: string
 }
 
 const AdminAppointments: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "accepted">("pending")
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false)
   const [isTechnicianModalOpen, setIsTechnicianModalOpen] = useState(false)
-  const [rejectReason, setRejectReason] = useState("")
   const [newDate, setNewDate] = useState("")
-  const [selectedTechnicians, setSelectedTechnicians] = useState<string[]>([])
+  const [selectedTechnicianNames, setSelectedTechnicianNames] = useState<string[]>([])
+  const [newTechnicianName, setNewTechnicianName] = useState("")
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [availableTechnicians, setAvailableTechnicians] = useState<Technician[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Example data - replace with actual data from your API
-  const appointments: Appointment[] = [
-    {
-      id: "1",
-      customerName: "John Doe",
-      date: "2025-08-15",
-      service: "Cleaning",
-      acType: "Split",
-      status: "pending",
-      technicians: []
-    },
-    {
-      id: "2",
-      customerName: "Jane Smith",
-      date: "2025-08-20",
-      service: "Repair",
-      acType: "Window",
-      status: "accepted",
-      technicians: [{ id: "1", name: "Tech 1" }]
+  // Fetch appointments and technicians on component mount
+  useEffect(() => {
+    fetchAppointments()
+    fetchTechnicians()
+  }, [])
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get('/appointments')
+      setAppointments(response.data)
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+      toast.error('Failed to fetch appointments')
+    } finally {
+      setLoading(false)
     }
-  ]
-
-  // Example technicians - replace with actual data
-  const availableTechnicians: Technician[] = [
-    { id: "1", name: "Tech 1" },
-    { id: "2", name: "Tech 2" },
-    { id: "3", name: "Tech 3" }
-  ]
-
-  const handleAccept = (appointment: Appointment) => {
-    // TODO: Implement actual API call
-    console.log(`Processing appointment ${appointment.id} for ${appointment.customerName}`)
-    toast.success("Appointment accepted successfully!")
   }
 
-  const handleReject = () => {
-    if (!selectedAppointment || !rejectReason) return
-    // TODO: Implement actual API call
-    toast.success("Appointment rejected successfully!")
-    setIsRejectModalOpen(false)
-    setRejectReason("")
+  const fetchTechnicians = async () => {
+    try {
+      const response = await api.get('/appointments/technicians')
+      setAvailableTechnicians(response.data)
+    } catch (error) {
+      console.error('Error fetching technicians:', error)
+      toast.error('Failed to fetch technicians')
+    }
   }
 
-  const handleReschedule = () => {
+  // Parse services from JSON string
+  const parseServices = (servicesJson: string): ServiceData[] => {
+    try {
+      return JSON.parse(servicesJson)
+    } catch {
+      return []
+    }
+  }
+
+  const handleAccept = async (appointment: Appointment) => {
+    try {
+      const response = await api.post(`/appointments/${appointment.id}/accept`, {
+        technician_names: appointment.technicians
+      })
+      if (response.data.message) {
+        toast.success(response.data.message)
+        await fetchAppointments() // Refresh appointments
+      }
+    } catch (error: any) {
+      console.error('Error accepting appointment:', error)
+      const errorMessage = error.response?.data?.error || 'Failed to accept appointment'
+      toast.error(errorMessage)
+    }
+  }
+
+  const handleCancel = async (appointment: Appointment) => {
+    try {
+      const response = await api.delete(`/appointments/${appointment.id}`)
+      if (response.data.success) {
+        toast.success(response.data.message)
+        await fetchAppointments() // Refresh appointments
+      }
+    } catch (error: any) {
+      console.error('Error cancelling appointment:', error)
+      const errorMessage = error.response?.data?.message || 'Failed to cancel appointment'
+      toast.error(errorMessage)
+    }
+  }
+
+  const handleReschedule = async () => {
     if (!selectedAppointment || !newDate) return
-    // TODO: Implement actual API call
-    toast.success("Appointment rescheduled successfully!")
-    setIsRescheduleModalOpen(false)
-    setNewDate("")
+    
+    try {
+      const services = parseServices(selectedAppointment.services)
+      if (services.length === 0) {
+        toast.error('No services found to reschedule')
+        return
+      }
+
+      // For simplicity, reschedule the first service or allow user to select
+      const serviceToReschedule = services[0]
+      
+      const response = await api.post(`/appointments/${selectedAppointment.id}/reschedule`, {
+        service_name: serviceToReschedule.type,
+        new_date: newDate
+      })
+      
+      if (response.data) {
+        toast.success('Appointment rescheduled successfully!')
+        await fetchAppointments() // Refresh appointments
+        setIsRescheduleModalOpen(false)
+        setNewDate("")
+      }
+    } catch (error: any) {
+      console.error('Error rescheduling appointment:', error)
+      const errorMessage = error.response?.data?.error || 'Failed to reschedule appointment'
+      toast.error(errorMessage)
+    }
   }
 
-  const handleComplete = (appointment: Appointment) => {
-    // TODO: Implement actual API call
-    console.log(`Marking appointment ${appointment.id} as completed`)
-    toast.success("Service marked as completed!")
+  const handleComplete = async (appointment: Appointment) => {
+    try {
+      const response = await api.post(`/appointments/${appointment.id}/complete`)
+      if (response.data) {
+        toast.success('Service marked as completed!')
+        await fetchAppointments() // Refresh appointments
+      }
+    } catch (error: any) {
+      console.error('Error completing appointment:', error)
+      const errorMessage = error.response?.data?.error || 'Failed to complete appointment'
+      toast.error(errorMessage)
+    }
   }
 
-  const handleAssignTechnicians = () => {
-    if (!selectedAppointment || !selectedTechnicians.length) return
-    // TODO: Implement actual API call
-    toast.success("Technicians assigned successfully!")
-    setIsTechnicianModalOpen(false)
-    setSelectedTechnicians([])
+  const handleAssignTechnicians = async () => {
+    if (!selectedAppointment || !selectedTechnicianNames.length) return
+    
+    try {
+      const response = await api.post(`/appointments/${selectedAppointment.id}/assign-technicians`, {
+        technician_names: selectedTechnicianNames
+      })
+      
+      if (response.data.success) {
+        toast.success(response.data.message)
+        await fetchAppointments() // Refresh appointments
+        await fetchTechnicians() // Refresh technicians list to include any new ones
+        setIsTechnicianModalOpen(false)
+        setSelectedTechnicianNames([])
+        setNewTechnicianName("")
+      }
+    } catch (error: any) {
+      console.error('Error assigning technicians:', error)
+      const errorMessage = error.response?.data?.error || 'Failed to assign technicians'
+      toast.error(errorMessage)
+    }
+  }
+
+  const handleAddNewTechnician = () => {
+    const trimmedName = newTechnicianName.trim()
+    if (!trimmedName) {
+      toast.error('Please enter a technician name')
+      return
+    }
+
+    // Check if technician name already exists
+    const existsInAvailable = availableTechnicians.some(tech => 
+      tech.name.toLowerCase() === trimmedName.toLowerCase()
+    )
+    const existsInSelected = selectedTechnicianNames.some(name => 
+      name.toLowerCase() === trimmedName.toLowerCase()
+    )
+
+    if (existsInAvailable || existsInSelected) {
+      toast.error('Technician name already exists')
+      return
+    }
+
+    // Add to selected technicians
+    setSelectedTechnicianNames([...selectedTechnicianNames, trimmedName])
+    setNewTechnicianName("")
+    toast.success(`Added "${trimmedName}" to selection`)
+  }
+
+  const handleRemoveTechnician = (technicianName: string) => {
+    setSelectedTechnicianNames(selectedTechnicianNames.filter(name => name !== technicianName))
   }
 
   const filteredAppointments = appointments.filter(
     (apt) => activeTab === "pending" ? apt.status === "pending" : apt.status === "accepted"
   )
+
+  // Helper function to display services info
+  const getServicesDisplay = (appointment: Appointment) => {
+    const services = parseServices(appointment.services)
+    if (services.length === 0) return 'No services'
+    
+    return services.map(service => 
+      `${service.type} (${new Date(service.date).toLocaleDateString()})`
+    ).join(', ')
+  }
+
+  // Helper function to display AC types
+  const getAcTypesDisplay = (appointment: Appointment) => {
+    const services = parseServices(appointment.services)
+    if (services.length === 0) return 'N/A'
+    
+    const allAcTypes = services.flatMap(service => service.ac_types)
+    const uniqueAcTypes = [...new Set(allAcTypes)]
+    return uniqueAcTypes.join(', ')
+  }
+
+  if (loading) {
+    return (
+      <AuthLayout role="admin">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center">Loading appointments...</div>
+          </div>
+        </div>
+      </AuthLayout>
+    )
+  }
 
   return (
     <AuthLayout role="admin">
@@ -144,13 +289,13 @@ const AdminAppointments: React.FC = () => {
                     Customer
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Date
+                    Phone
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Service
+                    Services & Dates
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    AC Type
+                    AC Types
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                     Technicians
@@ -167,23 +312,29 @@ const AdminAppointments: React.FC = () => {
                 {filteredAppointments.map((appointment) => (
                   <tr key={appointment.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {appointment.customerName}
+                      <div>
+                        <div className="font-medium">{appointment.name}</div>
+                        <div className="text-sm text-gray-500">{appointment.email}</div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {new Date(appointment.date).toLocaleDateString()}
+                    <td className="px-6 py-4 whitespace-nowrap">{appointment.phone}</td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm">
+                        {getServicesDisplay(appointment)}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{appointment.service}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{appointment.acType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getAcTypesDisplay(appointment)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {appointment.technicians.length ? (
-                          <span>{appointment.technicians.map(t => t.name).join(", ")}</span>
+                          <span>{appointment.technicians.join(", ")}</span>
                         ) : (
                           <span className="text-gray-400">Not assigned</span>
                         )}
                         <button
                           onClick={() => {
                             setSelectedAppointment(appointment)
+                            setSelectedTechnicianNames(appointment.technicians)
                             setIsTechnicianModalOpen(true)
                           }}
                           className="ml-2 text-blue-600 hover:text-blue-800"
@@ -216,13 +367,10 @@ const AdminAppointments: React.FC = () => {
                               Accept
                             </button>
                             <button
-                              onClick={() => {
-                                setSelectedAppointment(appointment)
-                                setIsRejectModalOpen(true)
-                              }}
+                              onClick={() => handleCancel(appointment)}
                               className="text-red-600 hover:text-red-800"
                             >
-                              Reject
+                              Cancel
                             </button>
                           </>
                         ) : (
@@ -252,48 +400,19 @@ const AdminAppointments: React.FC = () => {
         </div>
       </div>
 
-      {/* Reject Modal */}
-      {isRejectModalOpen && selectedAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertCircle className="w-6 h-6 text-red-600" />
-              <h3 className="text-lg font-semibold">Reject Appointment</h3>
-            </div>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Enter reason for rejection..."
-              className="w-full px-4 py-2 border rounded-lg mb-4"
-              rows={4}
-              required
-            />
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setIsRejectModalOpen(false)
-                  setRejectReason("")
-                }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReject}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Confirm Rejection
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Reschedule Modal */}
       {isRescheduleModalOpen && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <h3 className="text-lg font-semibold mb-4">Reschedule Appointment</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Services to reschedule:
+              </label>
+              <div className="text-sm text-gray-600">
+                {getServicesDisplay(selectedAppointment)}
+              </div>
+            </div>
             <input
               type="date"
               value={newDate}
@@ -326,32 +445,84 @@ const AdminAppointments: React.FC = () => {
       {/* Assign Technicians Modal */}
       {isTechnicianModalOpen && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4">Assign Technicians</h3>
-            <div className="space-y-2 mb-4">
-              {availableTechnicians.map((tech) => (
-                <label key={tech.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={selectedTechnicians.includes(tech.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTechnicians([...selectedTechnicians, tech.id])
-                      } else {
-                        setSelectedTechnicians(selectedTechnicians.filter(id => id !== tech.id))
-                      }
-                    }}
-                    className="rounded text-blue-600"
-                  />
-                  <span>{tech.name}</span>
-                </label>
-              ))}
+            
+            {/* Existing Technicians */}
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Available Technicians:</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {availableTechnicians.map((tech) => (
+                  <label key={tech.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTechnicianNames.includes(tech.name)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTechnicianNames([...selectedTechnicianNames, tech.name])
+                        } else {
+                          setSelectedTechnicianNames(selectedTechnicianNames.filter(name => name !== tech.name))
+                        }
+                      }}
+                      className="rounded text-blue-600"
+                    />
+                    <span>{tech.name}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+
+            {/* Add New Technician */}
+            <div className="mb-4 border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Add New Technician:</h4>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newTechnicianName}
+                  onChange={(e) => setNewTechnicianName(e.target.value)}
+                  placeholder="Enter technician name"
+                  className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddNewTechnician()
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleAddNewTechnician}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Selected Technicians */}
+            {selectedTechnicianNames.length > 0 && (
+              <div className="mb-4 border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Technicians:</h4>
+                <div className="space-y-1">
+                  {selectedTechnicianNames.map((name, index) => (
+                    <div key={index} className="flex items-center justify-between bg-blue-50 px-3 py-2 rounded">
+                      <span className="text-sm">{name}</span>
+                      <button
+                        onClick={() => handleRemoveTechnician(name)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setIsTechnicianModalOpen(false)
-                  setSelectedTechnicians([])
+                  setSelectedTechnicianNames([])
+                  setNewTechnicianName("")
                 }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
@@ -359,9 +530,14 @@ const AdminAppointments: React.FC = () => {
               </button>
               <button
                 onClick={handleAssignTechnicians}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={selectedTechnicianNames.length === 0}
+                className={`px-4 py-2 rounded-lg ${
+                  selectedTechnicianNames.length === 0
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
-                Assign
+                Assign ({selectedTechnicianNames.length})
               </button>
             </div>
           </div>
