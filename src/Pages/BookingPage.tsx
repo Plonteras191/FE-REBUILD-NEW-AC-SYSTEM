@@ -1,11 +1,14 @@
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { Plus, Trash2, User, Mail, Phone, MapPin, Calendar, Settings, Zap } from "lucide-react"
 import Layout from "../components/Layout"
 import { bookingAPI, type BookingFormData as APIBookingFormData } from "../Api/api"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import { format, parse, isValid } from "date-fns"
 
 interface ACTypeInput {
   id: string
@@ -41,6 +44,63 @@ const BookingPage: React.FC = () => {
     }],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [availableDates, setAvailableDates] = useState<string[]>([])
+  const [isLoadingDates, setIsLoadingDates] = useState(true)
+
+  // Fetch available dates on component mount
+  useEffect(() => {
+    fetchAvailableDates()
+  }, [])
+
+  const fetchAvailableDates = async () => {
+    try {
+      setIsLoadingDates(true)
+      const currentDate = new Date()
+      const endDate = new Date()
+      endDate.setFullYear(currentDate.getFullYear() + 1) // Get dates for next year
+      
+      const dates = await bookingAPI.getAvailableDates(
+        currentDate.toISOString().split('T')[0],
+        endDate.toISOString().split('T')[0]
+      )
+      
+      setAvailableDates(dates)
+    } catch (error) {
+      console.error('Error fetching available dates:', error)
+      toast.error('Failed to load available dates')
+    } finally {
+      setIsLoadingDates(false)
+    }
+  }
+
+  // Check if a specific date is available
+  const isDateAvailable = (date: string): boolean => {
+    if (!date) return true
+    return availableDates.includes(date)
+  }
+
+  // Check if a Date object is disabled (for react-datepicker)
+  const isDateDisabled = (date: Date): boolean => {
+    const dateString = format(date, 'yyyy-MM-dd')
+    return !availableDates.includes(dateString)
+  }
+
+  // Convert Date object to string for our form data
+  const formatDateForForm = (date: Date | null): string => {
+    if (!date) return ""
+    return format(date, 'yyyy-MM-dd')
+  }
+
+  // Convert string date to Date object for react-datepicker
+  const parseFormDate = (dateString: string): Date | null => {
+    if (!dateString) return null
+    try {
+      const parsedDate = parse(dateString, 'yyyy-MM-dd', new Date())
+      return isValid(parsedDate) ? parsedDate : null
+    } catch {
+      return null
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -51,6 +111,14 @@ const BookingPage: React.FC = () => {
   }
 
   const handleServiceChange = (index: number, field: keyof Service, value: string | ACTypeInput[]) => {
+    // If changing date, validate availability
+    if (field === 'date' && typeof value === 'string' && value) {
+      if (!isDateAvailable(value)) {
+        toast.error('Selected date is not available. Please choose another date.')
+        return
+      }
+    }
+
     setFormData((prev) => {
       const newServices = [...prev.services]
       newServices[index] = {
@@ -150,6 +218,35 @@ const BookingPage: React.FC = () => {
       }
     }
 
+    // Validate that all selected dates are still available
+    const selectedDates = formData.services.map(service => service.date).filter(date => date)
+    for (const date of selectedDates) {
+      if (!isDateAvailable(date)) {
+        toast.error(`Date ${new Date(date).toLocaleDateString()} is no longer available. Please select another date.`)
+        return
+      }
+    }
+
+    // Double-check availability with the server before submitting
+    if (selectedDates.length > 0) {
+      try {
+        const availabilityCheck = await bookingAPI.checkDateAvailability(selectedDates)
+        
+        for (const date of selectedDates) {
+          if (!availabilityCheck.dates[date]?.available) {
+            toast.error(`Date ${new Date(date).toLocaleDateString()} is no longer available. Please refresh and select another date.`)
+            // Refresh available dates
+            await fetchAvailableDates()
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Error checking date availability:', error)
+        toast.error('Unable to verify date availability. Please try again.')
+        return
+      }
+    }
+
     setIsSubmitting(true)
     
     try {
@@ -195,6 +292,9 @@ const BookingPage: React.FC = () => {
             acTypes: [{ id: "1", type: "Split" }]
           }],
         })
+        
+        // Refresh available dates since booking was successful
+        await fetchAvailableDates()
       } else {
         toast.error(response.message || "Failed to create booking")
       }
@@ -231,6 +331,57 @@ const BookingPage: React.FC = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+        {/* Custom styles for React DatePicker */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            .react-datepicker {
+              border: 1px solid #e5e7eb !important;
+              border-radius: 0.75rem !important;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+            }
+            .react-datepicker__header {
+              background-color: #3b82f6 !important;
+              border-bottom: none !important;
+              border-radius: 0.75rem 0.75rem 0 0 !important;
+            }
+            .react-datepicker__current-month {
+              color: white !important;
+              font-weight: 600 !important;
+            }
+            .react-datepicker__day-name {
+              color: white !important;
+            }
+            .react-datepicker__navigation {
+              top: 12px !important;
+            }
+            .react-datepicker__navigation--previous {
+              border-right-color: white !important;
+            }
+            .react-datepicker__navigation--next {
+              border-left-color: white !important;
+            }
+            .react-datepicker__day:hover {
+              background-color: #3b82f6 !important;
+              color: white !important;
+            }
+            .react-datepicker__day--selected {
+              background-color: #1d4ed8 !important;
+              color: white !important;
+            }
+            .react-datepicker__day--disabled {
+              color: #d1d5db !important;
+              background-color: #f9fafb !important;
+              cursor: not-allowed !important;
+            }
+            .react-datepicker__day--disabled:hover {
+              background-color: #f9fafb !important;
+              color: #d1d5db !important;
+            }
+            .react-datepicker__triangle {
+              border-bottom-color: #3b82f6 !important;
+            }
+          `
+        }} />
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
@@ -242,6 +393,22 @@ const BookingPage: React.FC = () => {
               Schedule your AC service with our professional team. Fill out the form below and we'll get back to you
               shortly.
             </p>
+            
+            {/* Date Availability Info */}
+            {isLoadingDates ? (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-blue-700 text-sm">Loading available dates...</p>
+              </div>
+            ) : (
+              <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                <p className="text-green-700 text-sm">
+                  📅 {availableDates.length > 0 
+                    ? `${availableDates.length} dates available for booking` 
+                    : 'No available dates found. Please try again later.'
+                  } (Maximum 2 bookings per day)
+                </p>
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -370,14 +537,54 @@ const BookingPage: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Service Date</label>
-                        <input
-                          type="date"
-                          value={service.date}
-                          onChange={(e) => handleServiceChange(index, "date", e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300"
+                        <label className="text-sm font-medium text-gray-700">
+                          Service Date
+                          {isLoadingDates && (
+                            <span className="text-xs text-blue-600 ml-2">(Loading available dates...)</span>
+                          )}
+                        </label>
+                        
+                        {/* React DatePicker */}
+                        <DatePicker
+                          selected={parseFormDate(service.date)}
+                          onChange={(date) => {
+                            const dateString = formatDateForForm(date)
+                            handleServiceChange(index, "date", dateString)
+                          }}
+                          filterDate={(date) => !isDateDisabled(date)}
+                          minDate={new Date()}
+                          maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
+                          placeholderText="Select a service date"
+                          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 ${
+                            service.date && !isDateAvailable(service.date) 
+                              ? 'border-red-300 bg-red-50' 
+                              : 'border-gray-200'
+                          }`}
+                          disabled={isLoadingDates}
+                          dateFormat="yyyy-MM-dd"
                           required
+                          autoComplete="off"
+                          popperClassName="react-datepicker-popper"
+                          calendarClassName="react-datepicker-calendar"
                         />
+                        
+                        {service.date && !isDateAvailable(service.date) && (
+                          <p className="text-xs text-red-600 mt-1">
+                            ❌ This date is not available (fully booked). Please select another date.
+                          </p>
+                        )}
+                        
+                        {service.date && isDateAvailable(service.date) && (
+                          <p className="text-xs text-green-600 mt-1">
+                            ✅ This date is available for booking.
+                          </p>
+                        )}
+                        
+                        {!isLoadingDates && availableDates.length === 0 && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            No available dates found. Please try again later.
+                          </p>
+                        )}
                       </div>
                     </div>
 
