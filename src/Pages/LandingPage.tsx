@@ -6,288 +6,436 @@ const LandingPage: React.FC = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-20 md:py-32 lg:py-40">
-            <div className="text-center space-y-8">
-              <div className="space-y-4">
-                <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6 hover:bg-blue-200 transition-colors duration-300">
-                  ⭐ Trusted by 10,000+ customers
-                </div>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-gray-900 leading-tight">
-                  Your{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
+      <section className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{animationDelay: '4s'}}></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-screen">
+            {/* Left Content */}
+            <div className="space-y-8 animate-slideInLeft">
+              <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold shadow-lg">
+                <span className="w-2 h-2 bg-blue-600 rounded-full mr-2 animate-pulse"></span>
+                Trusted by 10,000+ customers
+              </div>
+              
+              <div className="space-y-6">
+                <h1 className="text-5xl md:text-6xl xl:text-7xl font-black text-gray-900 leading-tight">
+                  Premium{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-700 to-cyan-600">
+                    AC Solutions
+                  </span>
+                  <br />
+                  for Your{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">
                     Comfort
                   </span>
-                  ,
-                  <br />
-                  Our Priority
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Experience premium air conditioning services with certified technicians, 24/7 support, and guaranteed
-                  satisfaction for your home and business.
+                
+                <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-medium">
+                  Experience unmatched air conditioning services with certified experts, 24/7 support, and guaranteed satisfaction for your home and business.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/book"
-                  className="group bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg"
+                  className="group bg-gradient-primary text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 shadow-glow hover:shadow-glow-lg flex items-center justify-center"
                 >
+                  <span className="mr-2">🚀</span>
                   Book Service Now
                   <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
                 </Link>
-                <button className="group bg-white hover:bg-gray-50 text-gray-900 font-semibold py-4 px-8 rounded-full text-lg border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg">
+                
+                <button className="group glass-effect text-gray-900 font-semibold py-4 px-8 rounded-2xl text-lg transition-all duration-300 hover:shadow-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
                   <span className="mr-2">📞</span>
-                  Call Now: (555) 123-4567
+                  Call: (555) 123-4567
                 </button>
               </div>
 
-              <div className="flex justify-center items-center space-x-8 pt-8 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  Available 24/7
-                </div>
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                  Licensed & Insured
-                </div>
-                <div className="flex items-center">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                  Same Day Service
+              <div className="flex flex-wrap gap-6 pt-4">
+                {[
+                  { icon: "⚡", text: "24/7 Available", color: "text-green-600" },
+                  { icon: "🛡️", text: "Licensed & Insured", color: "text-blue-600" },
+                  { icon: "⏱️", text: "Same Day Service", color: "text-purple-600" },
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <span className="text-lg">{item.icon}</span>
+                    <span className={`font-semibold ${item.color}`}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Content - Visual Element */}
+            <div className="relative animate-slideInRight">
+              <div className="relative">
+                <div className="w-full h-96 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl shadow-2xl transform rotate-3 opacity-20"></div>
+                <div className="absolute inset-0 w-full h-96 bg-gradient-to-br from-cyan-600 to-blue-700 rounded-3xl shadow-2xl transform -rotate-3">
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-white text-center space-y-4">
+                      <div className="text-6xl">❄️</div>
+                      <h3 className="text-2xl font-bold">Cool Comfort</h3>
+                      <p className="text-lg opacity-90">Professional AC Services</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Services Overview */}
-      <div className="py-20 bg-white">
+      {/* About Us Section */}
+      <section id="about" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Complete AC Solutions</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From installation to maintenance, we've got all your cooling needs covered
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8 animate-fadeInUp">
+              <div className="space-y-4">
+                <span className="text-blue-600 font-semibold text-lg">About AC System</span>
+                <h2 className="text-4xl md:text-5xl font-black text-gray-900">
+                  Your Trusted{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                    Cooling Partner
+                  </span>
+                </h2>
+                <p className="text-xl text-gray-600 leading-relaxed">
+                  With over 15 years of experience in the HVAC industry, we've built our reputation on delivering exceptional air conditioning services that keep your spaces comfortable year-round.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                {[
+                  { number: "10K+", label: "Happy Customers" },
+                  { number: "15+", label: "Years Experience" },
+                  { number: "24/7", label: "Support Available" },
+                  { number: "99%", label: "Satisfaction Rate" },
+                ].map((stat, index) => (
+                  <div key={index} className="text-center p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100">
+                    <div className="text-3xl font-black text-blue-600">{stat.number}</div>
+                    <div className="text-gray-600 font-medium">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  "Certified and licensed technicians",
+                  "State-of-the-art diagnostic equipment",
+                  "Comprehensive warranty on all services",
+                  "Eco-friendly and energy-efficient solutions",
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm">✓</span>
+                    </div>
+                    <span className="text-gray-700 font-medium">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="h-48 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 text-white flex flex-col justify-center items-center shadow-xl">
+                    <div className="text-4xl mb-2">🔧</div>
+                    <div className="text-lg font-bold text-center">Expert Repair</div>
+                  </div>
+                  <div className="h-32 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-6 text-white flex flex-col justify-center items-center shadow-xl">
+                    <div className="text-2xl mb-1">⚡</div>
+                    <div className="text-sm font-bold text-center">Fast Service</div>
+                  </div>
+                </div>
+                <div className="space-y-4 pt-8">
+                  <div className="h-32 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-2xl p-6 text-white flex flex-col justify-center items-center shadow-xl">
+                    <div className="text-2xl mb-1">🏆</div>
+                    <div className="text-sm font-bold text-center">Quality Work</div>
+                  </div>
+                  <div className="h-48 bg-gradient-to-br from-blue-700 to-purple-600 rounded-2xl p-6 text-white flex flex-col justify-center items-center shadow-xl">
+                    <div className="text-4xl mb-2">📞</div>
+                    <div className="text-lg font-bold text-center">24/7 Support</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-24 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16 animate-fadeInUp">
+            <span className="text-blue-600 font-semibold text-lg">Our Services</span>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mt-2 mb-4">
+              Complete{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                AC Solutions
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              From emergency repairs to new installations, we provide comprehensive air conditioning services tailored to your needs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: "🔧", title: "Repair", desc: "Quick fixes for any AC issue" },
-              { icon: "⚙️", title: "Maintenance", desc: "Keep your system running smooth" },
-              { icon: "🏠", title: "Installation", desc: "New system setup & replacement" },
-              { icon: "❄️", title: "Emergency", desc: "24/7 urgent service calls" },
+              {
+                icon: "🔧",
+                title: "AC Repair & Maintenance",
+                description: "Quick diagnosis and repair of all AC issues with preventive maintenance plans",
+                features: ["Emergency repairs", "Preventive maintenance", "Parts replacement", "Performance optimization"],
+                color: "from-blue-600 to-cyan-600"
+              },
+              {
+                icon: "🏠",
+                title: "Installation & Replacement",
+                description: "Professional installation of new AC systems and complete unit replacements",
+                features: ["New system installation", "Unit replacement", "Ductwork installation", "Energy assessment"],
+                color: "from-cyan-600 to-blue-600"
+              },
+              {
+                icon: "❄️",
+                title: "Emergency Services",
+                description: "24/7 emergency AC services for urgent cooling needs and breakdowns",
+                features: ["24/7 availability", "Same-day service", "Emergency repairs", "Holiday service"],
+                color: "from-purple-600 to-blue-600"
+              },
+              {
+                icon: "🌿",
+                title: "Energy Efficiency",
+                description: "Upgrade to energy-efficient systems and reduce your utility costs",
+                features: ["Energy audits", "Efficiency upgrades", "Smart thermostats", "Cost analysis"],
+                color: "from-green-600 to-cyan-600"
+              },
+              {
+                icon: "🏢",
+                title: "Commercial HVAC",
+                description: "Specialized commercial air conditioning solutions for businesses",
+                features: ["Commercial installation", "Industrial systems", "Maintenance contracts", "System monitoring"],
+                color: "from-blue-700 to-purple-600"
+              },
+              {
+                icon: "🔍",
+                title: "Inspection & Testing",
+                description: "Comprehensive AC system inspections and performance testing",
+                features: ["System diagnostics", "Performance testing", "Safety inspections", "Compliance checks"],
+                color: "from-indigo-600 to-blue-600"
+              },
             ].map((service, index) => (
               <div
                 key={index}
-                className="group bg-white p-8 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                className="group bg-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-blue-200"
               >
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className={`w-16 h-16 bg-gradient-to-r ${service.color} rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   {service.icon}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                <p className="text-gray-600">{service.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <div className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">Simple steps to get your AC running perfectly</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connection lines for desktop */}
-            <div className="hidden md:block absolute top-1/2 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-blue-200 to-blue-400 transform -translate-y-1/2"></div>
-
-            {[
-              {
-                step: "01",
-                title: "Book Service",
-                desc: "Schedule your appointment online or call us. Choose your preferred time slot.",
-                icon: "📅",
-              },
-              {
-                step: "02",
-                title: "Expert Visit",
-                desc: "Our certified technicians arrive on time with all necessary tools and parts.",
-                icon: "👨‍🔧",
-              },
-              {
-                step: "03",
-                title: "Service Complete",
-                desc: "We fix the issue, test everything, and ensure your complete satisfaction.",
-                icon: "✅",
-              },
-            ].map((item, index) => (
-              <div key={index} className="relative group">
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 hover:border-blue-200">
-                  <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-2xl font-bold mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
-                    {item.step}
-                  </div>
-                  <div className="text-4xl text-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">{item.title}</h3>
-                  <p className="text-gray-600 text-center leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="py-20 bg-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">What Our Customers Say</h2>
-            <p className="text-xl text-blue-100">Real reviews from satisfied customers</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                rating: 5,
-                text: "Excellent service! They fixed my AC in no time and the technician was very professional.",
-                location: "Downtown",
-              },
-              {
-                name: "Mike Chen",
-                rating: 5,
-                text: "Quick response time and fair pricing. My office AC is running better than ever!",
-                location: "Business District",
-              },
-              {
-                name: "Lisa Rodriguez",
-                rating: 5,
-                text: "24/7 service saved the day during a heatwave. Highly recommend their emergency service!",
-                location: "Suburbs",
-              },
-            ].map((review, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-              >
-                <div className="flex mb-4">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-xl">
-                      ⭐
-                    </span>
+                
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{service.title}</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">{service.description}</p>
+                
+                <ul className="space-y-2 mb-6">
+                  {service.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center text-gray-700">
+                      <span className="w-4 h-4 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs mr-3">✓</span>
+                      {feature}
+                    </li>
                   ))}
-                </div>
-                <p className="text-gray-700 mb-6 italic">"{review.text}"</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    {review.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-900">{review.name}</div>
-                    <div className="text-gray-500 text-sm">{review.location}</div>
-                  </div>
-                </div>
+                </ul>
+                
+                <button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg group-hover:shadow-xl">
+                  Learn More
+                </button>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-blue-600 to-blue-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Get Started?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Don't let AC problems disrupt your comfort. Book your service today and experience the difference.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/book"
-              className="group bg-white hover:bg-gray-100 text-blue-600 font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
-            >
-              Book Service Now
-              <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">→</span>
-            </Link>
-            <button className="group bg-transparent hover:bg-white/10 text-white font-semibold py-4 px-8 rounded-full text-lg border-2 border-white/30 hover:border-white transition-all duration-300">
-              <span className="mr-2">💬</span>
-              Get Free Quote
-            </button>
+      {/* Contact Section */}
+      <section id="contact" className="py-24 bg-gradient-primary text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <span className="text-blue-200 font-semibold text-lg">Get In Touch</span>
+                <h2 className="text-4xl md:text-5xl font-black">
+                  Ready for{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">
+                    Comfort?
+                  </span>
+                </h2>
+                <p className="text-xl text-blue-100 leading-relaxed">
+                  Don't let AC problems disrupt your comfort. Contact us today for fast, reliable service that gets your system running perfectly.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {[
+                  { icon: "📞", title: "Call Us", info: "(555) 123-4567", desc: "Available 24/7 for emergencies" },
+                  { icon: "✉️", title: "Email Us", info: "info@acsystem.com", desc: "Quick response guaranteed" },
+                  { icon: "📍", title: "Visit Us", info: "123 Service Street, City", desc: "Monday - Friday: 8AM - 6PM" },
+                  { icon: "💬", title: "Live Chat", info: "Chat with our experts", desc: "Instant support online" },
+                ].map((contact, index) => (
+                  <div key={index} className="flex items-start space-x-4 p-4 glass-effect rounded-2xl">
+                    <div className="text-2xl">{contact.icon}</div>
+                    <div>
+                      <h3 className="font-bold text-lg">{contact.title}</h3>
+                      <p className="text-blue-100 font-semibold">{contact.info}</p>
+                      <p className="text-blue-200 text-sm">{contact.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+              <h3 className="text-2xl font-bold mb-6">Get Free Quote</h3>
+              <form className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm"
+                  />
+                </div>
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm"
+                />
+                <select className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm">
+                  <option value="">Select Service</option>
+                  <option value="repair">AC Repair</option>
+                  <option value="installation">Installation</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="emergency">Emergency Service</option>
+                </select>
+                <textarea
+                  rows={4}
+                  placeholder="Describe your AC issue or requirements"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent backdrop-blur-sm resize-none"
+                ></textarea>
+                <button
+                  type="submit"
+                  className="w-full bg-white text-blue-600 font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:bg-blue-50 hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  Get Free Quote →
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <h3 className="text-2xl font-bold mb-4">AC System</h3>
-              <p className="text-gray-400 mb-6 max-w-md">
-                Your trusted partner for all air conditioning needs. Professional service, guaranteed satisfaction,
-                available 24/7.
-              </p>
-              <div className="flex space-x-4">
-                <button className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors duration-300">
-                  f
-                </button>
-                <button className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors duration-300">
-                  t
-                </button>
-                <button className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors duration-300">
-                  in
-                </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <div>
+                  <h3 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    AC System
+                  </h3>
+                  <p className="text-gray-400 mt-4 max-w-md leading-relaxed">
+                    Your trusted partner for all air conditioning needs. Professional service, guaranteed satisfaction, and 24/7 availability for your comfort and peace of mind.
+                  </p>
+                </div>
+                
+                <div className="flex space-x-4">
+                  {[
+                    { icon: "f", name: "Facebook" },
+                    { icon: "t", name: "Twitter" },
+                    { icon: "in", name: "LinkedIn" },
+                    { icon: "ig", name: "Instagram" },
+                  ].map((social, index) => (
+                    <button
+                      key={index}
+                      className="w-12 h-12 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-cyan-600 hover:to-blue-600 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                      title={social.name}
+                    >
+                      <span className="font-bold">{social.icon}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors duration-300">
-                    AC Repair
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors duration-300">
-                    Installation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors duration-300">
-                    Maintenance
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors duration-300">
-                    Emergency Service
-                  </a>
-                </li>
-              </ul>
-            </div>
+              <div className="space-y-4">
+                <h4 className="text-lg font-bold text-white">Quick Links</h4>
+                <ul className="space-y-3">
+                  {[
+                    { name: "About Us", href: "#about" },
+                    { name: "Services", href: "#services" },
+                    { name: "Contact", href: "#contact" },
+                    { name: "Emergency Service", href: "#" },
+                    { name: "Get Quote", href: "#" },
+                  ].map((link, index) => (
+                    <li key={index}>
+                      <a
+                        href={link.href}
+                        className="text-gray-400 hover:text-white transition-colors duration-300 hover:underline"
+                      >
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>📞 (555) 123-4567</li>
-                <li>✉️ info@acsystem.com</li>
-                <li>📍 123 Service St, City</li>
-                <li>🕒 24/7 Available</li>
-              </ul>
+              <div className="space-y-4">
+                <h4 className="text-lg font-bold text-white">Our Services</h4>
+                <ul className="space-y-3">
+                  {[
+                    "AC Repair",
+                    "Installation",
+                    "Maintenance",
+                    "Emergency Service",
+                    "Commercial HVAC",
+                  ].map((service, index) => (
+                    <li key={index}>
+                      <a
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors duration-300 hover:underline"
+                      >
+                        {service}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 AC System. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <div className="border-t border-gray-800 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className="text-gray-400 text-center md:text-left">
+                &copy; 2025 AC System. All rights reserved.
+              </p>
+              <div className="flex space-x-6 text-sm">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+                  Privacy Policy
+                </a>
+                <span className="text-gray-600">|</span>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+                  Terms of Service
+                </a>
+                <span className="text-gray-600">|</span>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors duration-300">
+                  Cookie Policy
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
